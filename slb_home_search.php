@@ -113,23 +113,24 @@ if ($_REQUEST[slb_comment_id] + 0 != '0') {
 if ($_REQUEST[bookcenter] == '1') {
     $sql = "SELECT * FROM slb_book WHERE (slb_book.booktitle like '%$_REQUEST[txtsearch]%' or slb_book.bookid like '%$_REQUEST[txtsearch]%' or slb_book.bookinid like '%$_REQUEST[txtsearch]%' or slb_book.bookcomment like '$_REQUEST[txtsearch]%' or slb_book.bookfrom like '$_REQUEST[txtsearch]%' or slb_book.bookto like '$_REQUEST[txtsearch]%') $datesearch $slb_booktype_search AND slb_book.bookcenter = '1' ORDER BY  slb_book_id desc ";
 } else {
+    $join_str='slb_book left join slb_booktopeople on slb_booktopeople.slb_book_id=slb_book.slb_book_id';
+    $select_str="select count(*) as c ";
     if ($_REQUEST[slb_dataorder] == 1) {
-        $sql = "SELECT *,slb_booktopeople.slb_book_id FROM slb_book , slb_booktopeople WHERE (slb_book.booktitle like '%$_REQUEST[txtsearch]%' or slb_book.bookid like '%$_REQUEST[txtsearch]%' or slb_book.bookinid like '%$_REQUEST[txtsearch]%' or slb_book.bookcomment like '$_REQUEST[txtsearch]%' or slb_book.bookfrom like '$_REQUEST[txtsearch]%' or slb_book.bookto like '$_REQUEST[txtsearch]%') $datesearch $slb_booktype_search $slb_comment_search AND slb_booktopeople.slb_book_id = slb_book.slb_book_id AND slb_booktopeople.people_id = '$_SESSION[userid]' AND slb_booktopeople.hiddenbook='0' and slb_booktopeople.school_id = '$_SESSION[school_id]' AND slb_booktopeople.completebook = '1'  
+        $sql = "FROM $join_str WHERE (slb_book.booktitle like '%$_REQUEST[txtsearch]%' or slb_book.bookid like '%$_REQUEST[txtsearch]%' or slb_book.bookinid like '%$_REQUEST[txtsearch]%' or slb_book.bookcomment like '$_REQUEST[txtsearch]%' or slb_book.bookfrom like '$_REQUEST[txtsearch]%' or slb_book.bookto like '$_REQUEST[txtsearch]%') $datesearch $slb_booktype_search $slb_comment_search AND slb_booktopeople.slb_book_id = slb_book.slb_book_id AND slb_booktopeople.people_id = '$_SESSION[userid]' AND slb_booktopeople.hiddenbook='0' and slb_booktopeople.school_id = '$_SESSION[school_id]' AND slb_booktopeople.completebook = '1'  
 GROUP BY slb_booktopeople.slb_book_id  
 ORDER BY pinbook desc , $slb_comment_order slb_book.slb_book_id desc";
     } else {
-        $sql = "SELECT *,slb_booktopeople.slb_book_id FROM slb_book , slb_booktopeople WHERE (slb_book.booktitle like '%$_REQUEST[txtsearch]%' or slb_book.bookid like '%$_REQUEST[txtsearch]%' or slb_book.bookinid like '%$_REQUEST[txtsearch]%' or slb_book.bookcomment like '$_REQUEST[txtsearch]%' or slb_book.bookfrom like '$_REQUEST[txtsearch]%' or slb_book.bookto like '$_REQUEST[txtsearch]%') $datesearch $slb_booktype_search $slb_comment_search AND slb_booktopeople.slb_book_id = slb_book.slb_book_id AND slb_booktopeople.people_id = '$_SESSION[userid]' AND slb_booktopeople.hiddenbook='0' and slb_booktopeople.school_id = '$_SESSION[school_id]' AND slb_booktopeople.completebook = '1'  
+        $sql = "FROM $join_str WHERE (slb_book.booktitle like '%$_REQUEST[txtsearch]%' or slb_book.bookid like '%$_REQUEST[txtsearch]%' or slb_book.bookinid like '%$_REQUEST[txtsearch]%' or slb_book.bookcomment like '$_REQUEST[txtsearch]%' or slb_book.bookfrom like '$_REQUEST[txtsearch]%' or slb_book.bookto like '$_REQUEST[txtsearch]%') $datesearch $slb_booktype_search $slb_comment_search AND slb_booktopeople.slb_book_id = slb_book.slb_book_id AND slb_booktopeople.people_id = '$_SESSION[userid]' AND slb_booktopeople.hiddenbook='0' and slb_booktopeople.school_id = '$_SESSION[school_id]' AND slb_booktopeople.completebook = '1'  
 GROUP BY slb_booktopeople.slb_book_id  
 ORDER BY pinbook desc , $slb_comment_order slb_booktopeople.readstatus desc , slb_book.slb_book_id desc";
     }
 }
-
-$result = mysql_db_query($dbname, $sql);
+$result = mysql_db_query($dbname, $select_str.$sql);
 //$num_rows = mysql_num_rows($result);
-$slb_c_data=mysql_fetsh_array($result);
-$num_rows=$slb_c_data['c'];
+$rData = mysql_fetch_array($result);
+$num_rows = $rData['c'];
 
-$result = pu_query($dbname, $sql, 20);;
+$result = pu_query($dbname, "select * ".$sql, 20);;
 echo '
 
 <table width=\'100%\' align=\'center\' class="table table-hover" style="border-collapse: collapse">
